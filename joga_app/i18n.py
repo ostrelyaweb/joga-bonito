@@ -4,9 +4,24 @@ _STRINGS = {
     "hr": {
         # Navigation
         "nav.swaps": "Zamjene",
+        "nav.patches": "Napredne izmjene",
         "nav.presets": "Preseti",
         "nav.history": "Povijest",
         "nav.settings": "Postavke",
+
+        # Validated patch packages
+        "patches.title": "Napredne izmjene",
+        "patches.subtitle": "Sigurni redirect i paint paketi s provjerom kompatibilnosti",
+        "patches.import": "Uvezi .jbpkg",
+        "patches.library": "Biblioteka paketa",
+        "patches.select": "Odaberi paket",
+        "patches.preview": "Provjeri / Dry run",
+        "patches.apply": "Primijeni",
+        "patches.restore": "Vrati original",
+        "patches.operations": "provjerenih promjena",
+        "patches.preview_hint": "Pokreni provjeru prije primjene. Nijedna datoteka neće biti izmijenjena.",
+        "patches.active": "Ovaj paket je aktivan za odabranu instalaciju.",
+        "patches.confirm_apply": "Primijeniti paket '{}'?\n\nProvjerene promjene:\n{}",
 
         # Sidebar
         "sidebar.install": "Instalacija",
@@ -143,13 +158,29 @@ _STRINGS = {
         "msg.import_success": "Preset uvezen: {}",
         "msg.import_error": "Greška pri uvozu preseta.",
         "msg.history_cleared": "Povijest obrisana.",
+        "msg.patch_imported": "Paket '{}' je sigurno uvezen.",
     },
     "en": {
         # Navigation
         "nav.swaps": "Swaps",
+        "nav.patches": "Advanced patches",
         "nav.presets": "Presets",
         "nav.history": "History",
         "nav.settings": "Settings",
+
+        # Validated patch packages
+        "patches.title": "Advanced patches",
+        "patches.subtitle": "Safe redirect and paint packages with compatibility checks",
+        "patches.import": "Import .jbpkg",
+        "patches.library": "Package library",
+        "patches.select": "Select a package",
+        "patches.preview": "Verify / Dry run",
+        "patches.apply": "Apply",
+        "patches.restore": "Restore original",
+        "patches.operations": "verified changes",
+        "patches.preview_hint": "Run verification before applying. No file will be modified.",
+        "patches.active": "This package is active for the selected installation.",
+        "patches.confirm_apply": "Apply package '{}'?\n\nVerified changes:\n{}",
 
         # Sidebar
         "sidebar.install": "Install",
@@ -286,6 +317,7 @@ _STRINGS = {
         "msg.import_success": "Preset imported: {}",
         "msg.import_error": "Error importing preset.",
         "msg.history_cleared": "History cleared.",
+        "msg.patch_imported": "Package '{}' was imported safely.",
     },
 }
 

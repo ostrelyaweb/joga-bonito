@@ -59,6 +59,7 @@ class PathLayout:
             self.packages / "balls",
             self.packages / "decals",
             self.packages / "hud",
+            self.packages / "patches",
             self.workshop,
         )
         for directory in directories:

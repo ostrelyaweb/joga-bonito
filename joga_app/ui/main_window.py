@@ -8,6 +8,7 @@ from PySide6.QtCore import QTimer, Qt, QPoint
 from PySide6.QtGui import QIcon, QPixmap
 
 from joga_app.ui.swaps_page import SwapsPage
+from joga_app.ui.patches_page import PatchesPage
 from joga_app.ui.presets_page import PresetsPage
 from joga_app.ui.history_page import HistoryPage
 from joga_app.ui.settings_page import SettingsPage
@@ -15,6 +16,7 @@ from joga_app.ui.sidebar import Sidebar
 from joga_app.ui.theme import get_stylesheet
 from joga_app.i18n import t, set_language
 from joga_app.config import BASE_DIR, VERSION
+from joga_app.patches import PatchService
 
 
 ICON_PATH = os.path.join(BASE_DIR, "assets", "icon.png")
@@ -187,12 +189,15 @@ class MainWindow(QMainWindow):
 
         # Pages
         self.swaps_page = SwapsPage(self.cfg, self.catalog, self.backend)
+        self.patch_service = PatchService()
+        self.patches_page = PatchesPage(self.cfg, self.patch_service)
         self.presets_page = PresetsPage(self.cfg, self.catalog, self.backend)
         self.history_page = HistoryPage(self.cfg, self.catalog, self.backend)
         self.settings_page = SettingsPage(self.cfg, self.catalog, self.backend)
 
         self.pages = [
             self.swaps_page,
+            self.patches_page,
             self.presets_page,
             self.history_page,
             self.settings_page,
