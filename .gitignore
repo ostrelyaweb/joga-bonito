@@ -13,6 +13,9 @@ env/
 build/
 dist/
 *.spec
+!JogaBonito.spec
+release-output/
+installer-smoke/
 
 *.log
 *.tmp

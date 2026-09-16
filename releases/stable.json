@@ -1,0 +1,15 @@
+{
+  "signed": {
+    "format": "joga-bonito.update",
+    "schema": 1,
+    "appVersion": "1.5.0",
+    "notes": "Joga Bonito 1.5.0 production release",
+    "package": {
+      "type": "installer",
+      "url": "https://github.com/ostrelyaweb/joga-bonito/releases/download/v1.5.0/JogaBonito-Setup-1.5.0.exe",
+      "size": 68432691,
+      "sha256": "5795f0631ca474ada01f368f9fcc38d110b42c72926f31e048b000dee21976b3"
+    }
+  },
+  "signature": "syQPlhReUaV2jEO2EYvHil+GxS9smJFljBRwelKYfJt2UGr8X7BddjdB3B10d8fSykM2IV8TCykmKtXDSkiqBw=="
+}

@@ -147,6 +147,15 @@ _STRINGS = {
         "settings.save": "Spremi",
         "settings.browse": "...",
         "settings.game_path": "Putanja do igre",
+        "settings.update_ready": "Potpisani kanal ažuriranja je spreman.",
+        "settings.check_updates": "Provjeri ažuriranja",
+        "settings.update_working": "Provjera potpisanih podataka...",
+        "settings.update_available": "Dostupna je verzija {}.",
+        "settings.download_update": "Preuzmi i provjeri",
+        "settings.update_current": "Koristiš najnoviju verziju.",
+        "settings.update_verified": "Paket je verificiran i spremljen: {}",
+        "settings.launch_installer": "Pokrenuti verificirani installer?",
+        "settings.update_failed": "Ažuriranje nije uspjelo: {}",
 
         # Install dialog
         "dlg.install_title": "Instalacija",
@@ -342,6 +351,15 @@ _STRINGS = {
         "settings.save": "Save",
         "settings.browse": "...",
         "settings.game_path": "Game path",
+        "settings.update_ready": "Signed update channel is ready.",
+        "settings.check_updates": "Check for updates",
+        "settings.update_working": "Checking signed release data...",
+        "settings.update_available": "Version {} is available.",
+        "settings.download_update": "Download and verify",
+        "settings.update_current": "You are using the latest version.",
+        "settings.update_verified": "Package verified and staged: {}",
+        "settings.launch_installer": "Launch the verified installer?",
+        "settings.update_failed": "Update failed: {}",
 
         # Install dialog
         "dlg.install_title": "Installation",

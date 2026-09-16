@@ -5,11 +5,14 @@ import os
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QScrollArea, QFrame, QLineEdit, QFileDialog, QComboBox, QMessageBox,
+    QApplication,
 )
 from PySide6.QtCore import Qt, Signal
 
 from joga_app.i18n import t, available_languages
 from joga_app.config import VERSION
+from joga_app.update import UpdateClient
+from joga_app.ui.update_worker import UpdateWorker
 
 
 class SettingsPage(QWidget):
@@ -22,6 +25,9 @@ class SettingsPage(QWidget):
         self.cfg = cfg
         self.catalog = catalog
         self.backend = backend
+        self.update_client = UpdateClient()
+        self.update_worker = None
+        self.available_update = None
 
         self._build_ui()
 
@@ -185,6 +191,16 @@ class SettingsPage(QWidget):
         ab_lay.addWidget(m2)
         ab_lay.addWidget(m3)
         ab_lay.addWidget(m4)
+
+        update_row = QHBoxLayout()
+        self.update_status = QLabel(t("settings.update_ready"))
+        self.update_status.setObjectName("manifestText")
+        update_row.addWidget(self.update_status, 1)
+        self.update_btn = QPushButton(t("settings.check_updates").upper())
+        self.update_btn.setObjectName("brassBtn")
+        self.update_btn.clicked.connect(self._on_update_action)
+        update_row.addWidget(self.update_btn)
+        ab_lay.addLayout(update_row)
         self.lay.addWidget(about_bench)
 
         self.lay.addStretch()
@@ -353,3 +369,43 @@ class SettingsPage(QWidget):
             self.cfg.language = code
             self.cfg.save()
             self.language_changed.emit(code)
+
+    def _on_update_action(self):
+        mode = "download" if self.available_update else "check"
+        self.update_btn.setEnabled(False)
+        self.update_status.setText(t("settings.update_working"))
+        self.update_worker = UpdateWorker(
+            self.update_client, mode, self.available_update, self
+        )
+        self.update_worker.succeeded.connect(
+            self._update_checked if mode == "check" else self._update_downloaded
+        )
+        self.update_worker.failed.connect(self._update_failed)
+        self.update_worker.finished.connect(lambda: self.update_btn.setEnabled(True))
+        self.update_worker.start()
+
+    def _update_checked(self, manifest):
+        if manifest.is_newer_than(VERSION):
+            self.available_update = manifest
+            self.update_status.setText(t("settings.update_available", manifest.version))
+            self.update_btn.setText(t("settings.download_update").upper())
+        else:
+            self.update_status.setText(t("settings.update_current"))
+
+    def _update_downloaded(self, path):
+        self.update_status.setText(t("settings.update_verified", str(path)))
+        if self.available_update.package_type == "installer":
+            answer = QMessageBox.question(
+                self, t("msg.confirm"), t("settings.launch_installer"),
+                QMessageBox.Yes | QMessageBox.No,
+            )
+            if answer == QMessageBox.Yes:
+                try:
+                    self.update_client.launch_installer(path)
+                    QApplication.quit()
+                except Exception as exc:
+                    self._update_failed(str(exc))
+
+    def _update_failed(self, message):
+        self.update_status.setText(t("settings.update_failed", message))
+        QMessageBox.warning(self, t("msg.warning"), message)

@@ -48,6 +48,10 @@ class PathLayout:
     def workshop(self) -> Path:
         return self.root / "workshop"
 
+    @property
+    def updates(self) -> Path:
+        return self.root / "updates"
+
     def ensure(self) -> None:
         directories = (
             self.root,
@@ -61,6 +65,7 @@ class PathLayout:
             self.packages / "hud",
             self.packages / "patches",
             self.workshop,
+            self.updates,
         )
         for directory in directories:
             directory.mkdir(parents=True, exist_ok=True)
