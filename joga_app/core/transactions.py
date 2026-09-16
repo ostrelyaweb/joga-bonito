@@ -91,6 +91,7 @@ class FileTransaction:
         rollback = self.rollback_dir / f"{index:04d}.rollback"
         shutil.copy2(target, rollback)
         action = {
+            "operation": "replace",
             "target": str(target),
             "rollback": str(rollback),
             "before": file_signature(target),
@@ -121,6 +122,66 @@ class FileTransaction:
             except OSError:
                 pass
 
+    def create(self, target, writer):
+        target = ensure_within(self.managed_root, target)
+        if target.exists():
+            raise FileExistsError(target)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        action = {
+            "operation": "create",
+            "target": str(target),
+            "rollback": "",
+            "before": None,
+            "after": None,
+            "plannedAfter": None,
+            "status": "prepared",
+        }
+        self.data["actions"].append(action)
+        self._save()
+        fd, temporary = tempfile.mkstemp(prefix=".joga-", suffix=".tmp", dir=str(target.parent))
+        os.close(fd)
+        try:
+            writer(temporary)
+            if not os.path.isfile(temporary):
+                raise OSError(f"Writer did not produce output for {target.name}")
+            with open(temporary, "r+b") as handle:
+                handle.flush()
+                os.fsync(handle.fileno())
+            action["plannedAfter"] = file_signature(temporary)
+            self._save()
+            if target.exists():
+                raise FileExistsError(target)
+            os.rename(temporary, target)
+            action["after"] = file_signature(target)
+            action["status"] = "applied"
+            self._save()
+        finally:
+            try:
+                os.unlink(temporary)
+            except OSError:
+                pass
+
+    def delete(self, target):
+        target = ensure_within(self.managed_root, target)
+        if not target.is_file():
+            raise FileNotFoundError(target)
+        index = len(self.data["actions"])
+        rollback = self.rollback_dir / f"{index:04d}.rollback"
+        shutil.copy2(target, rollback)
+        action = {
+            "operation": "delete",
+            "target": str(target),
+            "rollback": str(rollback),
+            "before": file_signature(target),
+            "after": None,
+            "status": "prepared",
+        }
+        self.data["actions"].append(action)
+        self._save()
+        target.unlink()
+        action["status"] = "applied"
+        self._save()
+
     def commit(self):
         self.data["status"] = "committed"
         self._save()
@@ -129,8 +190,17 @@ class FileTransaction:
     def rollback(self):
         errors = []
         for action in reversed(self.data.get("actions", [])):
-            rollback = Path(action["rollback"])
             target = Path(action["target"])
+            if action.get("operation") == "create":
+                expected = action.get("after") or action.get("plannedAfter")
+                try:
+                    if target.is_file() and expected and file_signature(target) == expected:
+                        target.unlink()
+                    action["status"] = "rolled_back"
+                except Exception as exc:
+                    errors.append(f"{target}: {exc}")
+                continue
+            rollback = Path(action["rollback"])
             if not rollback.is_file():
                 continue
             try:
@@ -171,8 +241,16 @@ class FileTransaction:
                 continue
             for action in reversed(data.get("actions", [])):
                 try:
-                    rollback = ensure_within(rollback_root, action.get("rollback", ""))
                     target = ensure_within(managed_root, action.get("target", ""))
+                    if action.get("operation") == "create":
+                        expected = action.get("after") or action.get("plannedAfter")
+                        if target.is_file() and expected and file_signature(target) == expected:
+                            target.unlink()
+                        elif target.exists():
+                            raise ValueError(f"Created target changed before recovery: {target}")
+                        action["status"] = "rolled_back"
+                        continue
+                    rollback = ensure_within(rollback_root, action.get("rollback", ""))
                     if not rollback.is_file() or not target.parent.is_dir():
                         raise FileNotFoundError(f"Recovery payload missing for {target}")
                     _atomic_restore(rollback, target)

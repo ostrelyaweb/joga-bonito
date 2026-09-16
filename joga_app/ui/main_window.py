@@ -10,6 +10,7 @@ from PySide6.QtGui import QIcon, QPixmap
 from joga_app.ui.swaps_page import SwapsPage
 from joga_app.ui.patches_page import PatchesPage
 from joga_app.ui.overlays_page import OverlaysPage
+from joga_app.ui.workshop_page import WorkshopPage
 from joga_app.ui.presets_page import PresetsPage
 from joga_app.ui.history_page import HistoryPage
 from joga_app.ui.settings_page import SettingsPage
@@ -19,6 +20,7 @@ from joga_app.i18n import t, set_language
 from joga_app.config import BASE_DIR, VERSION
 from joga_app.patches import PatchService
 from joga_app.overlays import OverlayManager
+from joga_app.workshop import WorkshopService
 
 
 ICON_PATH = os.path.join(BASE_DIR, "assets", "icon.png")
@@ -195,6 +197,8 @@ class MainWindow(QMainWindow):
         self.patches_page = PatchesPage(self.cfg, self.patch_service)
         self.overlay_manager = OverlayManager(parent=self)
         self.overlays_page = OverlaysPage(self.cfg, self.overlay_manager)
+        self.workshop_service = WorkshopService()
+        self.workshop_page = WorkshopPage(self.cfg, self.workshop_service)
         self.presets_page = PresetsPage(self.cfg, self.catalog, self.backend)
         self.history_page = HistoryPage(self.cfg, self.catalog, self.backend)
         self.settings_page = SettingsPage(self.cfg, self.catalog, self.backend)
@@ -203,6 +207,7 @@ class MainWindow(QMainWindow):
             self.swaps_page,
             self.patches_page,
             self.overlays_page,
+            self.workshop_page,
             self.presets_page,
             self.history_page,
             self.settings_page,
