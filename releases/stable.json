@@ -7,9 +7,9 @@
     "package": {
       "type": "installer",
       "url": "https://github.com/ostrelyaweb/joga-bonito/releases/download/v1.5.1/JogaBonito-Setup-1.5.1.exe",
-      "size": 58167184,
-      "sha256": "649e4cec4c882e532c4123d9995a04c602e73bd8e2307a0fc353bdd927b12551"
+      "size": 58167211,
+      "sha256": "b7a2e3d4686dcae3cbc2c6183d23a192ecadae05a868f19ea4e83c49ff2d03e2"
     }
   },
-  "signature": "YIVMW0ibO2svjHwsfKu0vGtF2tgh2ARu3NSbdxNQKjK6V6FxT1xW2EU69uAngewIjjnheODQwdg7k/0VVb3KBw=="
+  "signature": "PQmdw4TodnaxDkzfEqaibGDX8UMBLuDaOCIjoX3NQmljO5MxuzaGxPIWzGyjuEvG5WeCnEBvFTJgElfjzu8cAg=="
 }

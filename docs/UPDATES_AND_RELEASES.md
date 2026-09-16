@@ -31,3 +31,5 @@ The release script isolates PyInstaller from the launching shell's `PATH` and
 rejects external ICU DLLs. This prevents `WinError 127` / `DLL load failed while
 importing QtGui` when unrelated developer or media tools expose an incompatible
 `icuuc.dll` that PyInstaller would otherwise silently embed in the application.
+The installer also removes ICU DLLs left behind by version 1.5.0 during an
+in-place upgrade, so an existing broken installation is repaired automatically.
