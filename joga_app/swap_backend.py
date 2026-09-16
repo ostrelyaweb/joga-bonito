@@ -1,8 +1,6 @@
 import base64
+import copy
 import csv
-import glob
-import hashlib
-import json
 import os
 import shutil
 import struct
@@ -18,7 +16,10 @@ from joga_app.config import (
     PRESETS_FILE,
     PRODUCTS_CSV,
     SWAPS_LOG_FILE,
+    TRANSACTIONS_DIR,
 )
+from joga_app.core.storage import atomic_write_json, read_json
+from joga_app.core.transactions import FileTransaction, ensure_within, file_signature
 
 
 def _now():
@@ -26,10 +27,7 @@ def _now():
 
 
 def _file_sig(path):
-    size = os.path.getsize(path)
-    with open(path, "rb") as f:
-        digest = hashlib.sha256(f.read()).hexdigest()
-    return f"{size}:{digest}"
+    return file_signature(path)
 
 
 def _norm_install_dir(path):
@@ -163,6 +161,7 @@ def patch_and_reencrypt_upk(src_path, tgt_path, src_key_b64=None, tgt_key_b64=No
 class Swap:
     def __init__(self, install, source, target, timestamp=None):
         self.install_cooked_dir = install.get("cookedDir")
+        self.install_id = install.get("id", "")
         self.install_source = install.get("source", install.get("name", ""))
         self.install_name = install.get("name", "")
         self.source_file = source.file
@@ -173,6 +172,7 @@ class Swap:
 
     def to_dict(self):
         return {
+            "installId": self.install_id,
             "installCookedDir": self.install_cooked_dir,
             "installSource": self.install_source,
             "installName": self.install_name,
@@ -187,6 +187,7 @@ class Swap:
     def from_dict(cls, d):
         s = cls.__new__(cls)
         s.install_cooked_dir = d.get("installCookedDir")
+        s.install_id = d.get("installId", "")
         s.install_source = d.get("installSource", "")
         s.install_name = d.get("installName", "")
         s.source_file = d.get("sourceFile")
@@ -197,7 +198,8 @@ class Swap:
         return s
 
     def key(self):
-        return _norm_install_dir(self.install_cooked_dir or "") + "|" + (self.target_file or "").lower()
+        install_key = self.install_id or _norm_install_dir(self.install_cooked_dir or "")
+        return install_key + "|" + (self.target_file or "").lower()
 
 
 class PresetStore:
@@ -207,12 +209,8 @@ class PresetStore:
 
     def load(self, path=None):
         path = path or PRESETS_FILE
-        if not os.path.exists(path):
-            return
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-        except Exception:
+        data = read_json(path, None)
+        if not isinstance(data, dict):
             return
         self.current_preset = data.get("currentPreset", "Default")
         presets = data.get("presets")
@@ -224,8 +222,7 @@ class PresetStore:
     def save(self, path=None):
         path = path or PRESETS_FILE
         data = {"currentPreset": self.current_preset, "presets": self.presets}
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
+        atomic_write_json(path, data)
 
     def names(self):
         return [p.get("name") for p in self.presets]
@@ -303,15 +300,12 @@ class PresetStore:
                 break
         if preset is None:
             return False
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(preset, f, indent=2, ensure_ascii=False)
+        atomic_write_json(path, preset)
         return True
 
     def import_preset(self, path):
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-        except Exception:
+        data = read_json(path, None)
+        if not isinstance(data, dict):
             return None
         name = data.get("name")
         swaps = data.get("swaps")
@@ -331,28 +325,30 @@ class PresetStore:
 class SwapBackend:
     def __init__(self, cfg):
         self.cfg = cfg
+        self.recovered_transactions = FileTransaction.recover_incomplete(
+            TRANSACTIONS_DIR,
+            [install.get("cookedDir") for install in cfg.installs],
+        )
         self.presets = PresetStore()
         self.presets.load()
         self.aes_db = get_aes_db()
         os.makedirs(BACKUPS_DIR, exist_ok=True)
 
     def backups_dir(self, install):
-        d = os.path.join(BACKUPS_DIR, install.get("name", "install"))
+        install_id = install.get("id") or self.cfg._install_id(install)
+        d = os.path.join(BACKUPS_DIR, install_id)
+        legacy = os.path.join(BACKUPS_DIR, install.get("name", "install"))
+        if os.path.isdir(legacy) and not os.path.exists(d):
+            shutil.move(legacy, d)
         os.makedirs(d, exist_ok=True)
         return d
 
     def _read_sig(self):
-        if not os.path.exists(GAME_SIG_FILE):
-            return {}
-        try:
-            with open(GAME_SIG_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            return {}
+        data = read_json(GAME_SIG_FILE, {})
+        return data if isinstance(data, dict) else {}
 
     def _write_sig(self, data):
-        with open(GAME_SIG_FILE, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2)
+        atomic_write_json(GAME_SIG_FILE, data)
 
     def _sig_of_install(self, install, target_file):
         data = self._read_sig()
@@ -366,18 +362,23 @@ class SwapBackend:
         self._write_sig(data)
 
     def _append_log(self, swap):
-        log = []
-        if os.path.exists(SWAPS_LOG_FILE):
-            try:
-                with open(SWAPS_LOG_FILE, "r", encoding="utf-8") as f:
-                    log = json.load(f)
-                if not isinstance(log, list):
-                    log = []
-            except Exception:
-                log = []
+        log = read_json(SWAPS_LOG_FILE, [])
+        if not isinstance(log, list):
+            log = []
         log.append(swap.to_dict())
-        with open(SWAPS_LOG_FILE, "w", encoding="utf-8") as f:
-            json.dump(log, f, indent=2, ensure_ascii=False)
+        atomic_write_json(SWAPS_LOG_FILE, log)
+
+    @staticmethod
+    def _safe_game_file(cooked, filename):
+        if not filename or os.path.basename(filename) != filename:
+            raise ValueError(f"Unsafe game filename: {filename}")
+        return str(ensure_within(cooked, os.path.join(cooked, filename)))
+
+    @staticmethod
+    def _check_space(cooked, paths):
+        required = sum(os.path.getsize(path) for path in paths if os.path.isfile(path)) * 2
+        if shutil.disk_usage(cooked).free < required:
+            raise OSError("Not enough free disk space for a safe swap and rollback")
 
     def _extract_pkg_name(self, filename):
         """Extract base package name (e.g. 'WHEEL_Hydra_SF.upk' -> 'WHEEL_Hydra')."""
@@ -416,8 +417,11 @@ class SwapBackend:
         if not cooked or not os.path.isdir(cooked):
             return False, "msg.install_missing", cooked
 
-        src_path = os.path.join(cooked, source.file)
-        tgt_path = os.path.join(cooked, target.file)
+        try:
+            src_path = self._safe_game_file(cooked, source.file)
+            tgt_path = self._safe_game_file(cooked, target.file)
+        except ValueError as exc:
+            return False, "msg.swap_failed", str(exc)
 
         if not os.path.exists(src_path):
             return False, "msg.source_missing", source.file
@@ -427,81 +431,153 @@ class SwapBackend:
         back = self.backups_dir(install)
         baseline = os.path.join(back, target.file)
 
-        # 1. Backup original target file
-        if not os.path.exists(baseline):
-            shutil.copyfile(tgt_path, baseline)
-            self._record_sig(install, target.file, _file_sig(baseline))
-
-        # 2. Lookup AES keys
         src_pkg = self._extract_pkg_name(source.file)
         tgt_pkg = self._extract_pkg_name(target.file)
         src_key = self.aes_db.get_key_for_package(src_pkg)
         tgt_key = self.aes_db.get_key_for_package(tgt_pkg)
-
-        # 3. Main UPK: Decrypt with src_key, re-encrypt with tgt_key
-        try:
-            patch_and_reencrypt_upk(src_path, tgt_path, src_key, tgt_key)
-        except Exception as e:
-            print(f"[apply_swap] Main UPK re-encryption failed: {e}")
-            shutil.copyfile(src_path, tgt_path)
-
-        # 4. Companion Texture Package (_T_SF.upk)
         src_tex = self._find_texture_file(cooked, src_pkg)
         tgt_tex = self._find_texture_file(cooked, tgt_pkg)
-        if src_tex and tgt_tex:
-            src_tex_path = os.path.join(cooked, src_tex)
-            tgt_tex_path = os.path.join(cooked, tgt_tex)
-            tex_backup = os.path.join(back, tgt_tex)
-            if not os.path.exists(tex_backup):
-                shutil.copyfile(tgt_tex_path, tex_backup)
-            try:
-                patch_and_reencrypt_upk(src_tex_path, tgt_tex_path, src_key, tgt_key)
-            except Exception as e:
-                shutil.copyfile(src_tex_path, tgt_tex_path)
-
-        # 5. Companion Sound Bank (.bnk)
         src_bnk = self._find_sound_file(cooked, src_pkg)
         tgt_bnk = self._find_sound_file(cooked, tgt_pkg)
+        source_paths = [src_path, tgt_path]
+        if src_tex and tgt_tex:
+            source_paths.extend(
+                [self._safe_game_file(cooked, src_tex), self._safe_game_file(cooked, tgt_tex)]
+            )
         if src_bnk and tgt_bnk:
-            src_bnk_path = os.path.join(cooked, src_bnk)
-            tgt_bnk_path = os.path.join(cooked, tgt_bnk)
-            bnk_backup = os.path.join(back, tgt_bnk)
-            if not os.path.exists(bnk_backup):
-                shutil.copyfile(tgt_bnk_path, bnk_backup)
-            shutil.copyfile(src_bnk_path, tgt_bnk_path)
+            source_paths.extend(
+                [self._safe_game_file(cooked, src_bnk), self._safe_game_file(cooked, tgt_bnk)]
+            )
 
-        swap = Swap(install, source, target)
-        self.presets.add_swap(swap)
-        self._append_log(swap)
-        return True, "msg.swap_applied", source.label, target.label
+        transaction = None
+        preset_snapshot = copy.deepcopy(self.presets.presets)
+        current_preset_snapshot = self.presets.current_preset
+        history_snapshot = read_json(SWAPS_LOG_FILE, [])
+        try:
+            self._check_space(cooked, source_paths)
+            if not os.path.exists(baseline):
+                shutil.copy2(tgt_path, baseline)
+                self._record_sig(install, target.file, _file_sig(baseline))
+
+            transaction = FileTransaction(
+                "apply_swap",
+                cooked,
+                install.get("id") or self.cfg._install_id(install),
+                {"source": source.file, "target": target.file},
+                TRANSACTIONS_DIR,
+            )
+
+            def write_main(output):
+                try:
+                    patch_and_reencrypt_upk(src_path, output, src_key, tgt_key)
+                except Exception:
+                    shutil.copyfile(src_path, output)
+
+            transaction.replace(tgt_path, write_main)
+
+            if src_tex and tgt_tex:
+                src_tex_path = self._safe_game_file(cooked, src_tex)
+                tgt_tex_path = self._safe_game_file(cooked, tgt_tex)
+                tex_backup = os.path.join(back, tgt_tex)
+                if not os.path.exists(tex_backup):
+                    shutil.copy2(tgt_tex_path, tex_backup)
+
+                def write_texture(output):
+                    try:
+                        patch_and_reencrypt_upk(src_tex_path, output, src_key, tgt_key)
+                    except Exception:
+                        shutil.copyfile(src_tex_path, output)
+
+                transaction.replace(tgt_tex_path, write_texture)
+
+            if src_bnk and tgt_bnk:
+                src_bnk_path = self._safe_game_file(cooked, src_bnk)
+                tgt_bnk_path = self._safe_game_file(cooked, tgt_bnk)
+                bnk_backup = os.path.join(back, tgt_bnk)
+                if not os.path.exists(bnk_backup):
+                    shutil.copy2(tgt_bnk_path, bnk_backup)
+                transaction.replace(
+                    tgt_bnk_path,
+                    lambda output: shutil.copyfile(src_bnk_path, output),
+                )
+
+            swap = Swap(install, source, target)
+            self.presets.add_swap(swap)
+            self._append_log(swap)
+            transaction.commit()
+            return True, "msg.swap_applied", source.label, target.label
+        except Exception as exc:
+            self.presets.presets = preset_snapshot
+            self.presets.current_preset = current_preset_snapshot
+            try:
+                self.presets.save()
+                atomic_write_json(
+                    SWAPS_LOG_FILE,
+                    history_snapshot if isinstance(history_snapshot, list) else [],
+                )
+            except OSError:
+                pass
+            if transaction is not None:
+                transaction.rollback()
+            return False, "msg.swap_failed", str(exc)
 
     def restore_swap(self, install, swap):
         back = self.backups_dir(install)
         baseline = os.path.join(back, swap.target_file)
         cooked = install.get("cookedDir", "")
-        tgt = os.path.join(cooked, swap.target_file)
+        try:
+            tgt = self._safe_game_file(cooked, swap.target_file)
+        except ValueError as exc:
+            return False, "msg.restore_failed", str(exc)
 
         if not os.path.exists(baseline):
             return False, "msg.no_backup", swap.target_file
         if not os.path.isdir(cooked):
             return False, "msg.install_missing", cooked
 
-        # Restore main UPK
-        shutil.copyfile(baseline, tgt)
+        transaction = None
+        preset_snapshot = copy.deepcopy(self.presets.presets)
+        current_preset_snapshot = self.presets.current_preset
+        try:
+            transaction = FileTransaction(
+                "restore_swap",
+                cooked,
+                install.get("id") or self.cfg._install_id(install),
+                {"target": swap.target_file},
+                TRANSACTIONS_DIR,
+            )
+            transaction.replace(tgt, lambda output: shutil.copyfile(baseline, output))
 
-        # Restore companion textures if in backup
-        tgt_pkg = self._extract_pkg_name(swap.target_file)
-        tgt_tex = self._find_texture_file(back, tgt_pkg)
-        if tgt_tex:
-            shutil.copyfile(os.path.join(back, tgt_tex), os.path.join(cooked, tgt_tex))
+            tgt_pkg = self._extract_pkg_name(swap.target_file)
+            tgt_tex = self._find_texture_file(back, tgt_pkg)
+            if tgt_tex:
+                destination = self._safe_game_file(cooked, tgt_tex)
+                transaction.replace(
+                    destination,
+                    lambda output: shutil.copyfile(os.path.join(back, tgt_tex), output),
+                )
 
-        # Restore companion sound if in backup
-        tgt_bnk = self._find_sound_file(back, tgt_pkg)
-        if tgt_bnk:
-            shutil.copyfile(os.path.join(back, tgt_bnk), os.path.join(cooked, tgt_bnk))
+            tgt_bnk = self._find_sound_file(back, tgt_pkg)
+            if tgt_bnk:
+                destination = self._safe_game_file(cooked, tgt_bnk)
+                transaction.replace(
+                    destination,
+                    lambda output: shutil.copyfile(os.path.join(back, tgt_bnk), output),
+                )
 
-        self.presets.remove_swap(swap)
-        return True, "msg.swap_restored", swap.target_label
+            self.presets.remove_swap(swap)
+            transaction.commit()
+            return True, "msg.swap_restored", swap.target_label
+        except Exception as exc:
+            self.presets.presets = preset_snapshot
+            self.presets.current_preset = current_preset_snapshot
+            try:
+                self.presets.save()
+            except OSError:
+                pass
+            if transaction is not None:
+                transaction.rollback()
+            return False, "msg.restore_failed", str(exc)
 
     def restore_all(self, install):
         swaps = self.presets.active_by_install(install.get("name", ""))
@@ -520,7 +596,7 @@ class SwapBackend:
         return True, "msg.record_removed", swap.target_label
 
     def _install_for_swap(self, swap):
-        install = self.cfg.get_install(swap.install_name)
+        install = self.cfg.get_install(swap.install_id or swap.install_name)
         if install is None:
             return {
                 "name": swap.install_name or swap.install_source,
@@ -569,16 +645,9 @@ class SwapBackend:
 
     @staticmethod
     def load_history():
-        if not os.path.exists(SWAPS_LOG_FILE):
-            return []
-        try:
-            with open(SWAPS_LOG_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            return data if isinstance(data, list) else []
-        except Exception:
-            return []
+        data = read_json(SWAPS_LOG_FILE, [])
+        return data if isinstance(data, list) else []
 
     @staticmethod
     def clear_history():
-        with open(SWAPS_LOG_FILE, "w", encoding="utf-8") as f:
-            json.dump([], f)
+        atomic_write_json(SWAPS_LOG_FILE, [])

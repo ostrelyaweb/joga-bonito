@@ -216,7 +216,13 @@ class MainWindow(QMainWindow):
         self.sidebar.set_installs(self.cfg.installs)
 
         # Status bar
-        self.statusBar().showMessage(t("msg.ready"))
+        if self.backend.recovered_transactions:
+            self.statusBar().showMessage(
+                t("msg.transactions_recovered", len(self.backend.recovered_transactions)),
+                12000,
+            )
+        else:
+            self.statusBar().showMessage(t("msg.ready"))
 
         # Canary drift check
         QTimer.singleShot(0, self._run_canary)

@@ -37,6 +37,21 @@ def ensure_within(root, candidate) -> Path:
     return candidate_path
 
 
+def _atomic_restore(source: Path, target: Path) -> None:
+    fd, temporary = tempfile.mkstemp(
+        prefix=".joga-rollback-", suffix=".tmp", dir=str(target.parent)
+    )
+    os.close(fd)
+    try:
+        shutil.copy2(source, temporary)
+        os.replace(temporary, target)
+    finally:
+        try:
+            os.unlink(temporary)
+        except OSError:
+            pass
+
+
 class FileTransaction:
     """Journaled, recoverable set of atomic file replacements."""
 
@@ -93,7 +108,8 @@ class FileTransaction:
             writer(temporary)
             if not os.path.isfile(temporary):
                 raise OSError(f"Writer did not produce output for {target.name}")
-            with open(temporary, "rb") as handle:
+            with open(temporary, "r+b") as handle:
+                handle.flush()
                 os.fsync(handle.fileno())
             os.replace(temporary, target)
             action["after"] = file_signature(target)
@@ -119,12 +135,7 @@ class FileTransaction:
                 continue
             try:
                 target.parent.mkdir(parents=True, exist_ok=True)
-                fd, temporary = tempfile.mkstemp(
-                    prefix=".joga-rollback-", suffix=".tmp", dir=str(target.parent)
-                )
-                os.close(fd)
-                shutil.copy2(rollback, temporary)
-                os.replace(temporary, target)
+                _atomic_restore(rollback, target)
                 action["status"] = "rolled_back"
             except Exception as exc:
                 errors.append(f"{target}: {exc}")
@@ -136,8 +147,11 @@ class FileTransaction:
         return errors
 
     @staticmethod
-    def recover_incomplete(journal_dir=None):
+    def recover_incomplete(journal_dir=None, allowed_roots=None):
         journal_dir = Path(journal_dir or PATHS.transactions)
+        allowed = None
+        if allowed_roots is not None:
+            allowed = {Path(root).resolve() for root in allowed_roots if root}
         recovered = []
         if not journal_dir.is_dir():
             return recovered
@@ -146,22 +160,30 @@ class FileTransaction:
             if data.get("status") not in {"active", "rollback_failed"}:
                 continue
             errors = []
+            managed_root = Path(data.get("managedRoot", "")).resolve()
+            transaction_id = data.get("id", journal.stem)
+            rollback_root = journal_dir / f"{transaction_id}.files"
+            if allowed is not None and managed_root not in allowed:
+                data["status"] = "rollback_failed"
+                data["errors"] = [f"Unrecognised managed root: {managed_root}"]
+                data["updatedAt"] = utc_now()
+                atomic_write_json(journal, data)
+                continue
             for action in reversed(data.get("actions", [])):
-                rollback = Path(action.get("rollback", ""))
-                target = Path(action.get("target", ""))
-                if not rollback.is_file() or not target.parent.is_dir():
-                    continue
                 try:
-                    shutil.copy2(rollback, target)
+                    rollback = ensure_within(rollback_root, action.get("rollback", ""))
+                    target = ensure_within(managed_root, action.get("target", ""))
+                    if not rollback.is_file() or not target.parent.is_dir():
+                        raise FileNotFoundError(f"Recovery payload missing for {target}")
+                    _atomic_restore(rollback, target)
                     action["status"] = "rolled_back"
                 except Exception as exc:
-                    errors.append(f"{target}: {exc}")
+                    errors.append(str(exc))
             data["status"] = "rollback_failed" if errors else "rolled_back"
             data["errors"] = errors
             data["updatedAt"] = utc_now()
             atomic_write_json(journal, data)
             if not errors:
-                rollback_dir = journal_dir / f"{data.get('id', journal.stem)}.files"
-                shutil.rmtree(rollback_dir, ignore_errors=True)
-                recovered.append(data.get("id", journal.stem))
+                shutil.rmtree(rollback_root, ignore_errors=True)
+                recovered.append(transaction_id)
         return recovered
