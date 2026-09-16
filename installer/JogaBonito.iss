@@ -1,7 +1,13 @@
 #define MyAppName "Joga Bonito"
-#define MyAppVersion "1.5.0"
+#define MyAppVersion "1.5.1"
 #define MyAppPublisher "Joga Bonito"
 #define MyAppExeName "JogaBonito.exe"
+#ifndef SourceDir
+#define SourceDir "..\dist\JogaBonito"
+#endif
+#ifndef ReleaseDir
+#define ReleaseDir "..\release-output"
+#endif
 
 [Setup]
 AppId={{CB2E3B9A-218D-4E7E-98E8-D8EA21358D67}
@@ -11,7 +17,7 @@ AppPublisher={#MyAppPublisher}
 DefaultDirName={localappdata}\Programs\JogaBonito
 DefaultGroupName={#MyAppName}
 PrivilegesRequired=lowest
-OutputDir=..\release-output
+OutputDir={#ReleaseDir}
 OutputBaseFilename=JogaBonito-Setup-{#MyAppVersion}
 SetupIconFile=..\assets\icon.ico
 Compression=lzma2/ultra64
@@ -22,7 +28,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 UninstallDisplayIcon={app}\{#MyAppExeName}
 
 [Files]
-Source: "..\dist\JogaBonito\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

@@ -18,7 +18,7 @@ ITEM_ICONS_DIR = os.path.join(BASE_DIR, "assets", "item_icons")
 DATA_DIR = os.path.join(BASE_DIR, "joga_data")
 PRODUCTS_CSV = os.path.join(DATA_DIR, "products.csv")
 KEYS_FILE = os.path.join(DATA_DIR, "keys.txt")
-VERSION = "1.5.0"
+VERSION = "1.5.1"
 
 DEFAULT_INSTALLS = [
     {

@@ -24,3 +24,10 @@ To produce `releases/stable.json`, pass the private key and final HTTPS download
 URL to the build script. Upload the exact generated installer/ZIP to that URL,
 then publish the signed JSON at the configured stable-channel URL. Never edit a
 signed field by hand after signing.
+
+## Windows runtime compatibility
+
+The release script isolates PyInstaller from the launching shell's `PATH` and
+rejects external ICU DLLs. This prevents `WinError 127` / `DLL load failed while
+importing QtGui` when unrelated developer or media tools expose an incompatible
+`icuuc.dll` that PyInstaller would otherwise silently embed in the application.
