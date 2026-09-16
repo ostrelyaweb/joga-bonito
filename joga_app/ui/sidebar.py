@@ -61,9 +61,10 @@ class Sidebar(QFrame):
         nav_entries = [
             ("01  " + t("nav.swaps"), 0),
             ("02  " + t("nav.patches"), 1),
-            ("03  " + t("nav.presets"), 2),
-            ("04  " + t("nav.history"), 3),
-            ("05  " + t("nav.settings"), 4),
+            ("03  " + t("nav.overlays"), 2),
+            ("04  " + t("nav.presets"), 3),
+            ("05  " + t("nav.history"), 4),
+            ("06  " + t("nav.settings"), 5),
         ]
 
         for text, idx in nav_entries:

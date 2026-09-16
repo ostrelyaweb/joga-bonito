@@ -9,6 +9,7 @@ from PySide6.QtGui import QIcon, QPixmap
 
 from joga_app.ui.swaps_page import SwapsPage
 from joga_app.ui.patches_page import PatchesPage
+from joga_app.ui.overlays_page import OverlaysPage
 from joga_app.ui.presets_page import PresetsPage
 from joga_app.ui.history_page import HistoryPage
 from joga_app.ui.settings_page import SettingsPage
@@ -17,6 +18,7 @@ from joga_app.ui.theme import get_stylesheet
 from joga_app.i18n import t, set_language
 from joga_app.config import BASE_DIR, VERSION
 from joga_app.patches import PatchService
+from joga_app.overlays import OverlayManager
 
 
 ICON_PATH = os.path.join(BASE_DIR, "assets", "icon.png")
@@ -191,6 +193,8 @@ class MainWindow(QMainWindow):
         self.swaps_page = SwapsPage(self.cfg, self.catalog, self.backend)
         self.patch_service = PatchService()
         self.patches_page = PatchesPage(self.cfg, self.patch_service)
+        self.overlay_manager = OverlayManager(parent=self)
+        self.overlays_page = OverlaysPage(self.cfg, self.overlay_manager)
         self.presets_page = PresetsPage(self.cfg, self.catalog, self.backend)
         self.history_page = HistoryPage(self.cfg, self.catalog, self.backend)
         self.settings_page = SettingsPage(self.cfg, self.catalog, self.backend)
@@ -198,6 +202,7 @@ class MainWindow(QMainWindow):
         self.pages = [
             self.swaps_page,
             self.patches_page,
+            self.overlays_page,
             self.presets_page,
             self.history_page,
             self.settings_page,
@@ -228,6 +233,7 @@ class MainWindow(QMainWindow):
             )
         else:
             self.statusBar().showMessage(t("msg.ready"))
+        self.statusBar().messageChanged.connect(self._on_status_message)
 
         # Canary drift check
         QTimer.singleShot(0, self._run_canary)
@@ -247,9 +253,17 @@ class MainWindow(QMainWindow):
                 if hasattr(page, "set_install"):
                     page.set_install(install)
 
+    def closeEvent(self, event):
+        self.overlay_manager.shutdown()
+        super().closeEvent(event)
+
     def _on_installs_changed(self):
         """Re-sync sidebar when the installs list is modified in Settings."""
         self.sidebar.set_installs(self.cfg.installs)
+
+    def _on_status_message(self, message):
+        if message and hasattr(self, "overlay_manager"):
+            self.overlay_manager.notify(message)
 
     def _run_canary(self):
         results = self.backend.check_for_drift()
