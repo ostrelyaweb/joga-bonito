@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 64">
+  <!-- Back P (lighter PayPal blue) -->
+  <path fill="#009CDE" d="M22 12 L46 12 C56 12 63 19 63 28 C63 39 55 47 43 47 L33 47 L31 56 L20 56 L24 26 L34 26 L33 35 L40 35 C45 35 48 32 48 28 C48 24 46 22 42 22 L25 22 Z"/>
+  <!-- Front P (darker PayPal blue) -->
+  <path fill="#003087" d="M32 8 L56 8 C66 8 73 15 73 24 C73 35 65 43 53 43 L43 43 L41 52 L30 52 L34 22 L44 22 L43 31 L50 31 C55 31 58 28 58 24 C58 20 56 18 52 18 L35 18 Z"/>
+</svg>

@@ -1,0 +1,317 @@
+"""Internationalization module for Joga Bonito — Croatian (hr) + English (en)."""
+
+_STRINGS = {
+    "hr": {
+        # Navigation
+        "nav.swaps": "Zamjene",
+        "nav.presets": "Preseti",
+        "nav.history": "Povijest",
+        "nav.settings": "Postavke",
+
+        # Sidebar
+        "sidebar.install": "Instalacija",
+
+        # Swaps page
+        "swaps.title": "Zamjene predmeta",
+        "swaps.search": "Pretraži predmete...",
+        "swaps.cat_all": "Sve",
+        "swaps.source_label": "Izgled koji želiš prikazati (source):",
+        "swaps.target_label": "Predmet u igri koji posjeduješ (target):",
+        "swaps.apply": "Primijeni zamjenu",
+        "swaps.active": "Aktivne zamjene",
+        "swaps.restore": "Vrati",
+        "swaps.remove": "Ukloni",
+        "swaps.restore_all": "Vrati sve",
+        "swaps.refresh": "Osvježi katalog",
+        "swaps.compatible": "Kompatibilno — oboje su: {}",
+        "swaps.incompatible": "NEKOMPATIBILNO: {} ≠ {} — swap može oštetiti igru!",
+        "swaps.no_items": "Nema predmeta (folder prazan ili nepostojeći).",
+        "swaps.install_col": "Instalacija",
+        "swaps.time_col": "Vrijeme",
+        "swaps.actions_col": "Akcije",
+        "swaps.source_col": "Izgled (source)",
+        "swaps.target_col": "Predmet (target)",
+
+        # Categories
+        "cat.Wheel": "Kotači",
+        "cat.Boost": "Boost",
+        "cat.Body": "Karoserija",
+        "cat.Decal": "Naljepnica",
+        "cat.Antenna": "Antena",
+        "cat.Topper": "Topper",
+        "cat.Trail": "Trag",
+        "cat.Banner": "Banner",
+        "cat.Avatar Border": "Okvir avatara",
+        "cat.Goal Explosion": "Eksplozija gola",
+        "cat.Engine Audio": "Zvuk motora",
+        "cat.Anthem": "Himna",
+        "cat.Rocket Boost": "Rocket Boost",
+        "cat.Ball": "Lopta",
+        "cat.Other": "Ostalo",
+
+        # Presets page
+        "presets.title": "Preseti",
+        "presets.save": "Spremi preset",
+        "presets.apply": "Primijeni",
+        "presets.delete": "Obriši",
+        "presets.new": "+ Novi preset",
+        "presets.import": "Uvezi preset",
+        "presets.export": "Izvezi preset",
+        "presets.active_swaps": "{} aktivnih zamjena",
+        "presets.name_prompt": "Ime preseta:",
+        "presets.save_title": "Spremi preset",
+
+        # History page
+        "history.title": "Povijest zamjena",
+        "history.source": "Izgled (source)",
+        "history.target": "Predmet (target)",
+        "history.install": "Instalacija",
+        "history.time": "Vrijeme",
+        "history.reapply": "Ponovo primijeni",
+        "history.no_history": "Nema povijesti zamjena.",
+        "history.clear": "Obriši povijest",
+        "history.clear_confirm": "Obrisati cijelu povijest zamjena?",
+        "history.actions": "Akcije",
+
+        # Settings page
+        "settings.title": "Postavke",
+        "settings.installs": "Instalacije igre",
+        "settings.connected": "Povezano",
+        "settings.disconnected": "Nepovezano",
+        "settings.add": "+ Dodaj instalaciju",
+        "settings.edit": "Uredi",
+        "settings.remove": "Obriši",
+        "settings.items_db": "Items baza podataka",
+        "settings.items_loaded": "{} predmeta učitano",
+        "settings.appearance": "Izgled",
+        "settings.theme": "Tema",
+        "settings.theme_light": "Svijetla",
+        "settings.theme_dark": "Tamna",
+        "settings.theme_auto": "Auto",
+        "settings.language": "Jezik",
+        "settings.general": "Općenito",
+        "settings.auto_reapply": "Automatski ponovo primijeni nakon game updatea",
+        "settings.about": "O aplikaciji",
+        "settings.version": "Joga Bonito v{}",
+        "settings.save": "Spremi",
+        "settings.browse": "...",
+        "settings.game_path": "Putanja do igre",
+
+        # Install dialog
+        "dlg.install_title": "Instalacija",
+        "dlg.name": "Ime (npr. Steam):",
+        "dlg.source": "Izvor (Epic/Steam):",
+        "dlg.cooked": "CookedPCConsole:",
+        "dlg.browse": "Odaberi CookedPCConsole",
+        "dlg.required": "Ime i folder su obavezni.",
+
+        # Messages
+        "msg.warning": "Upozorenje",
+        "msg.error": "Greška",
+        "msg.info": "Informacija",
+        "msg.confirm": "Potvrda",
+        "msg.ready": "Spremno.",
+        "msg.catalog_refreshed": "Katalog osvježen.",
+        "msg.swap_applied": "Swap primijenjen: {} → {}",
+        "msg.swap_restored": "Vraćen original: {}",
+        "msg.record_removed": "Zapis uklonjen: {}",
+        "msg.preset_saved": "Preset '{}' spremljen.",
+        "msg.preset_applied": "Preset '{}' primijenjen.",
+        "msg.preset_reapplied": "Preset '{}' primijenjen. Re-aplicirano: {}",
+        "msg.preset_deleted": "Preset '{}' obrisan.",
+        "msg.no_backup": "Nema backupa za {}",
+        "msg.install_missing": "Instalacija ne postoji: {}",
+        "msg.source_missing": "Izvor nije prisutan u instalaciji: {}",
+        "msg.target_missing": "Cilj nije prisutan u instalaciji: {}",
+        "msg.select_install": "Odaberi instalaciju.",
+        "msg.no_items_select": "Nema predmeta za odabir.",
+        "msg.confirm_incompatible": "Kategorije se ne podudaraju ({} vs {}).\nSwap različitih tipova može oštetiti igru. Nastaviti?",
+        "msg.incompatible_title": "Nekompatibilni predmeti",
+        "msg.select_preset": "Odaberi preset.",
+        "msg.active_preset_nodelete": "Aktivan preset se ne može brisati.\nPrvo prebaci na drugi preset.",
+        "msg.min_one_install": "Mora ostati barem jedna instalacija.",
+        "msg.items_db_saved": "Baza podataka spremljena.",
+        "msg.canary_title": "Canary",
+        "msg.canary_drift": "Game update je prepisao datoteke; swapovi re-aplicirani:\n\n{}",
+        "msg.canary_ok": "Canary: bez drifta.",
+        "msg.batch_restored": "Vraćeno {} zamjena.",
+        "msg.batch_restore_confirm": "Vratiti sve aktivne zamjene za {}?",
+        "msg.export_success": "Preset izvezen: {}",
+        "msg.import_success": "Preset uvezen: {}",
+        "msg.import_error": "Greška pri uvozu preseta.",
+        "msg.history_cleared": "Povijest obrisana.",
+    },
+    "en": {
+        # Navigation
+        "nav.swaps": "Swaps",
+        "nav.presets": "Presets",
+        "nav.history": "History",
+        "nav.settings": "Settings",
+
+        # Sidebar
+        "sidebar.install": "Install",
+
+        # Swaps page
+        "swaps.title": "Item Swaps",
+        "swaps.search": "Search items...",
+        "swaps.cat_all": "All",
+        "swaps.source_label": "Appearance you want to show (source):",
+        "swaps.target_label": "Item you own in-game (target):",
+        "swaps.apply": "Apply Swap",
+        "swaps.active": "Active Swaps",
+        "swaps.restore": "Restore",
+        "swaps.remove": "Remove",
+        "swaps.restore_all": "Restore All",
+        "swaps.refresh": "Refresh Catalog",
+        "swaps.compatible": "Compatible — both are: {}",
+        "swaps.incompatible": "INCOMPATIBLE: {} ≠ {} — swap may damage the game!",
+        "swaps.no_items": "No items (folder empty or missing).",
+        "swaps.install_col": "Install",
+        "swaps.time_col": "Time",
+        "swaps.actions_col": "Actions",
+        "swaps.source_col": "Appearance (source)",
+        "swaps.target_col": "Item (target)",
+
+        # Categories
+        "cat.Wheel": "Wheels",
+        "cat.Boost": "Boosts",
+        "cat.Body": "Bodies",
+        "cat.Decal": "Decals",
+        "cat.Antenna": "Antennas",
+        "cat.Topper": "Toppers",
+        "cat.Trail": "Trails",
+        "cat.Banner": "Banners",
+        "cat.Avatar Border": "Avatar Borders",
+        "cat.Goal Explosion": "Goal Explosions",
+        "cat.Engine Audio": "Engine Audio",
+        "cat.Anthem": "Anthems",
+        "cat.Rocket Boost": "Rocket Boosts",
+        "cat.Ball": "Balls",
+        "cat.Other": "Other",
+
+        # Presets page
+        "presets.title": "Presets",
+        "presets.save": "Save Preset",
+        "presets.apply": "Apply",
+        "presets.delete": "Delete",
+        "presets.new": "+ New Preset",
+        "presets.import": "Import Preset",
+        "presets.export": "Export Preset",
+        "presets.active_swaps": "{} active swaps",
+        "presets.name_prompt": "Preset name:",
+        "presets.save_title": "Save Preset",
+
+        # History page
+        "history.title": "Swap History",
+        "history.source": "Appearance (source)",
+        "history.target": "Item (target)",
+        "history.install": "Install",
+        "history.time": "Time",
+        "history.reapply": "Re-apply",
+        "history.no_history": "No swap history.",
+        "history.clear": "Clear History",
+        "history.clear_confirm": "Clear entire swap history?",
+        "history.actions": "Actions",
+
+        # Settings page
+        "settings.title": "Settings",
+        "settings.installs": "Game Installations",
+        "settings.connected": "Connected",
+        "settings.disconnected": "Disconnected",
+        "settings.add": "+ Add Installation",
+        "settings.edit": "Edit",
+        "settings.remove": "Remove",
+        "settings.items_db": "Items Database",
+        "settings.items_loaded": "{} items loaded",
+        "settings.appearance": "Appearance",
+        "settings.theme": "Theme",
+        "settings.theme_light": "Light",
+        "settings.theme_dark": "Dark",
+        "settings.theme_auto": "Auto",
+        "settings.language": "Language",
+        "settings.general": "General",
+        "settings.auto_reapply": "Auto-reapply swaps after game update",
+        "settings.about": "About",
+        "settings.version": "Joga Bonito v{}",
+        "settings.save": "Save",
+        "settings.browse": "...",
+        "settings.game_path": "Game path",
+
+        # Install dialog
+        "dlg.install_title": "Installation",
+        "dlg.name": "Name (e.g. Steam):",
+        "dlg.source": "Source (Epic/Steam):",
+        "dlg.cooked": "CookedPCConsole:",
+        "dlg.browse": "Select CookedPCConsole",
+        "dlg.required": "Name and folder are required.",
+
+        # Messages
+        "msg.warning": "Warning",
+        "msg.error": "Error",
+        "msg.info": "Information",
+        "msg.confirm": "Confirm",
+        "msg.ready": "Ready.",
+        "msg.catalog_refreshed": "Catalog refreshed.",
+        "msg.swap_applied": "Swap applied: {} → {}",
+        "msg.swap_restored": "Original restored: {}",
+        "msg.record_removed": "Record removed: {}",
+        "msg.preset_saved": "Preset '{}' saved.",
+        "msg.preset_applied": "Preset '{}' applied.",
+        "msg.preset_reapplied": "Preset '{}' applied. Re-applied: {}",
+        "msg.preset_deleted": "Preset '{}' deleted.",
+        "msg.no_backup": "No backup for {}",
+        "msg.install_missing": "Installation not found: {}",
+        "msg.source_missing": "Source not found in installation: {}",
+        "msg.target_missing": "Target not found in installation: {}",
+        "msg.select_install": "Select an installation.",
+        "msg.no_items_select": "No items to select.",
+        "msg.confirm_incompatible": "Categories don't match ({} vs {}).\nSwapping different types may damage the game. Continue?",
+        "msg.incompatible_title": "Incompatible Items",
+        "msg.select_preset": "Select a preset.",
+        "msg.active_preset_nodelete": "Cannot delete the active preset.\nSwitch to another preset first.",
+        "msg.min_one_install": "At least one installation must remain.",
+        "msg.items_db_saved": "Items database saved.",
+        "msg.canary_title": "Canary",
+        "msg.canary_drift": "Game update overwrote files; swaps re-applied:\n\n{}",
+        "msg.canary_ok": "Canary: no drift detected.",
+        "msg.batch_restored": "{} swaps restored.",
+        "msg.batch_restore_confirm": "Restore all active swaps for {}?",
+        "msg.export_success": "Preset exported: {}",
+        "msg.import_success": "Preset imported: {}",
+        "msg.import_error": "Error importing preset.",
+        "msg.history_cleared": "History cleared.",
+    },
+}
+
+# ---------------------------------------------------------------------------
+# Module-level singleton
+# ---------------------------------------------------------------------------
+_current_lang = "hr"
+_current_strings = _STRINGS["hr"]
+
+
+def set_language(lang: str):
+    """Switch the active language (e.g. 'hr' or 'en')."""
+    global _current_lang, _current_strings
+    _current_lang = lang
+    _current_strings = _STRINGS.get(lang, _STRINGS["hr"])
+
+
+def get_language() -> str:
+    return _current_lang
+
+
+def available_languages():
+    """Return list of (code, display_name) tuples."""
+    return [("hr", "Hrvatski"), ("en", "English")]
+
+
+def t(key: str, *args) -> str:
+    """Translate *key*, optionally formatting with positional *args*."""
+    text = _current_strings.get(key, key)
+    if args:
+        try:
+            return text.format(*args)
+        except (IndexError, KeyError):
+            return text
+    return text

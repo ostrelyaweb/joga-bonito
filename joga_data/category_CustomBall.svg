@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Soccer ball: outer circle with a central pentagon and the five
+       seams radiating to the rim. Pure currentColor so tinting works
+       under both themes. -->
+  <circle cx="12" cy="12" r="9.5"/>
+  <polygon points="12,7 16.3,10 14.6,15 9.4,15 7.7,10"/>
+  <line x1="12" y1="7" x2="12" y2="3"/>
+  <line x1="16.3" y1="10" x2="20" y2="8"/>
+  <line x1="14.6" y1="15" x2="17.5" y2="19"/>
+  <line x1="9.4" y1="15" x2="6.5" y2="19"/>
+  <line x1="7.7" y1="10" x2="4" y2="8"/>
+</svg>

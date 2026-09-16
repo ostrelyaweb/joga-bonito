@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 36">
+  <rect width="60" height="36" fill="#012169"/>
+  <path d="M0,0 L60,36 M60,0 L0,36" stroke="#FFFFFF" stroke-width="7"/>
+  <path d="M0,0 L60,36" stroke="#C8102E" stroke-width="3" stroke-dasharray="20,7,7,7,7,20" stroke-dashoffset="-7"/>
+  <path d="M60,0 L0,36" stroke="#C8102E" stroke-width="3" stroke-dasharray="20,7,7,7,7,20" stroke-dashoffset="-7"/>
+  <path d="M30,0 V36 M0,18 H60" stroke="#FFFFFF" stroke-width="10"/>
+  <path d="M30,0 V36 M0,18 H60" stroke="#C8102E" stroke-width="6"/>
+</svg>

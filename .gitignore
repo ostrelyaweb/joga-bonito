@@ -1,0 +1,30 @@
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.coverage
+htmlcov/
+
+.venv/
+venv/
+env/
+
+build/
+dist/
+*.spec
+
+*.log
+*.tmp
+*.bak
+
+# Mutable local/user data
+settings.json
+presets.json
+swaps.json
+game_sig.json
+Backups/
+
+# Platform files
+Thumbs.db
+Desktop.ini
+.DS_Store

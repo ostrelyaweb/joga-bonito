@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Folded paper map: three panels with alternating peak/valley
+       folds along the top and bottom edges, plus two interior crease
+       lines. Matches the silhouette people expect for a map /
+       cartography icon at small icon sizes. -->
+  <path d="M3 6 L9 4 L15 6 L21 4 L21 18 L15 20 L9 18 L3 20 Z"/>
+  <line x1="9"  y1="4" x2="9"  y2="18"/>
+  <line x1="15" y1="6" x2="15" y2="20"/>
+</svg>

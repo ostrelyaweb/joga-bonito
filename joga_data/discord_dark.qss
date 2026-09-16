@@ -1,0 +1,821 @@
+/* Shift — modern dark theme
+   Inspired by Linear / Arc / Raycast. Tighter type, refined layered surfaces,
+   single accent (indigo). Discord palette retired.
+
+   Inverted palette: sidebar is the darkest surface (deep black), the main
+   canvas is one step lighter, and elevated cards / search / preview sit
+   another step above that. This mirrors the user's reference image.
+
+   Surfaces
+     Sidebar    #08090B   deep black — category column
+     Canvas     #16181D   window / main panels
+     Surface-2  #1D2027   cards, search, preview
+     Surface-3  #262A33   row hover
+     Surface-4  #2F343E   row selected / pressed
+
+   Borders
+     Hairline   rgba(255,255,255,0.06)   surface separators
+     Strong     rgba(255,255,255,0.10)   focus / hover outlines
+
+   Text
+     Primary    #ECEDEF
+     Secondary  #9BA1AD
+     Tertiary   #6A7180
+     Disabled   #4A4F58
+
+   Accent (indigo)
+     Accent     #7C7CFB    primary buttons, focus ring, selected indicator
+     AccentHi   #9696FF    hover
+     AccentLo   #5B5BD6    pressed
+     AccentMute rgba(124,124,251,0.14)  ghost backgrounds, soft fills
+
+   Semantic
+     Success    #34D399
+     Danger     #F87171
+*/
+
+* {
+    font-family: "Inter", "SF Pro Display", "Segoe UI Variable", "Segoe UI", "Helvetica Neue", sans-serif;
+    font-size: 13px;
+    color: #ECEDEF;
+}
+
+QMainWindow#MainWindow,
+QWidget#Central {
+    background: #16181D;
+}
+
+/* ---------- Title bar ---------- */
+
+#TitleBar {
+    background: #08090B;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+#TitleLabel {
+    font-size: 13px;
+    font-weight: 600;
+    color: #ECEDEF;
+    letter-spacing: 0.2px;
+}
+#TitleCredit {
+    font-size: 12px;
+    color: #9BA1AD;
+    letter-spacing: 0.3px;
+}
+
+QToolButton#BtnSettings, QToolButton#BtnMin, QToolButton#BtnMax, QToolButton#BtnClose {
+    background: transparent;
+    border: none;
+    color: #9BA1AD;
+    border-radius: 6px;
+    min-width: 28px; max-width: 28px;
+    min-height: 24px; max-height: 24px;
+    font-size: 13px;
+}
+QToolButton#BtnSettings:hover, QToolButton#BtnMin:hover, QToolButton#BtnMax:hover {
+    background: #1D2027;
+    color: #FFFFFF;
+}
+
+#ThemeIcon {
+    color: #9BA1AD;
+    font-size: 13px;
+    padding: 0 1px;
+}
+
+QToolButton#BtnLang {
+    background: #1D2027;
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 6px;
+    min-width: 36px; max-width: 36px;
+    min-height: 22px; max-height: 22px;
+    padding: 2px 4px 2px 4px;
+}
+QToolButton#BtnLang:hover { background: #262A33; border: 1px solid rgba(255,255,255,0.22); }
+QToolButton#BtnLang::menu-indicator { image: none; width: 0; }
+QToolButton#BtnLang::menu-button { width: 0; border: none; }
+
+QMenu#LangMenu {
+    background: #16181D;
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 8px;
+    padding: 4px;
+    color: #ECEDEF;
+}
+QMenu#LangMenu::item {
+    background: transparent;
+    padding: 6px 12px 6px 8px;
+    border-radius: 6px;
+    min-width: 110px;
+}
+QMenu#LangMenu::item:selected {
+    background: rgba(124,124,251,0.18);
+    color: #FFFFFF;
+}
+QMenu#LangMenu::icon { padding-right: 8px; padding-left: 4px; }
+QToolButton#BtnClose:hover { background: #F87171; color: #FFFFFF; }
+
+/* ---------- Body / panes ---------- */
+
+#Body              { background: #16181D; }
+/* Inverted: sidebar is the darkest surface (deep black), main panels sit
+   on the lighter canvas above. Single solid color, no gradient.
+   NavRail + CategoryPanel jointly replace the old Sidebar column. */
+#Sidebar {
+    background: #08090B;
+    border-right: 1px solid rgba(255,255,255,0.06);
+    min-width: 240px; max-width: 240px;
+}
+#NavRail {
+    background: #08090B;
+    border-right: 1px solid rgba(255,255,255,0.06);
+}
+#CategoryPanel {
+    background: #08090B;
+    border-right: 1px solid rgba(255,255,255,0.06);
+    min-width: 200px; max-width: 200px;
+}
+#ListPanel         { background: #16181D; }
+#DetailPane        { background: #16181D; }
+#ActiveSwapsView   { background: #16181D; }
+#SwapPickerView    { background: #16181D; }
+#BallView          { background: #16181D; }
+#HudMeterView      { background: #16181D; }
+#DecalView         { background: #16181D; }
+
+#SidebarSectionHeader {
+    color: #6A7180;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    padding: 18px 14px 6px 14px;
+    background: transparent;
+}
+#SidebarHairline { background: rgba(255,255,255,0.06); margin: 0 16px; }
+
+/* Sidebar / CategoryPanel list rows — pill-shaped, indigo accent on selection */
+#Sidebar QListView,
+#CategoryPanel QListView { background: transparent; border: none; padding: 0 0 8px 0; outline: 0; }
+#Sidebar QListView::item,
+#CategoryPanel QListView::item {
+    padding: 7px 10px;
+    border-radius: 8px;
+    margin: 1px 8px;
+    color: #9BA1AD;
+    min-height: 22px;
+}
+#Sidebar QListView::item:hover,
+#CategoryPanel QListView::item:hover    { background: rgba(255,255,255,0.04); color: #ECEDEF; }
+#Sidebar QListView::item:selected,
+#CategoryPanel QListView::item:selected {
+    background: rgba(124,124,251,0.18);
+    color: #FFFFFF;
+}
+
+/* ---------- NavRail buttons ---------- */
+
+QToolButton#NavRailButton {
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    color: #9BA1AD;
+    text-align: left;
+}
+QToolButton#NavRailButton:hover {
+    background: rgba(255,255,255,0.04);
+    color: #ECEDEF;
+}
+QToolButton#NavRailButton:checked {
+    background: rgba(124,124,251,0.18);
+    color: #FFFFFF;
+}
+
+/* ---------- BallCard ---------- */
+
+#BallCard {
+    background: #1D2027;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+#BallCardName { color: #ECEDEF; font-weight: 600; }
+
+/* ---------- DecalCard (mirror BallCard) ---------- */
+
+#DecalCard {
+    background: #1D2027;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+#DecalCardName    { color: #ECEDEF; font-weight: 600; }
+#DecalCardRequire { color: rgba(236,237,239,0.55); font-size: 12px; }
+
+/* ---------- WorkshopCard (mirror DecalCard) ---------- */
+
+#WorkshopView { background: #16181D; }
+#WorkshopCard {
+    background: #1D2027;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+#WorkshopCard[active="true"] { border: 1px solid #2EA44F; }
+#WorkshopCardName   { color: #ECEDEF; font-weight: 600; }
+#WorkshopCardAuthor { color: rgba(236,237,239,0.55); font-size: 12px; }
+#WorkshopCardActiveBadge {
+    color: #2EA44F; font-weight: 700; font-size: 11px;
+    letter-spacing: 1px; padding: 2px 8px;
+}
+#WorkshopViewTitle       { color: #ECEDEF; font-size: 18px; font-weight: 600; }
+#WorkshopViewActiveLabel { color: rgba(236,237,239,0.55); font-size: 12px; }
+#WorkshopViewStatus      { color: rgba(236,237,239,0.55); font-size: 12px; }
+
+/* ---------- HudMeterCard (mirror BallCard) ---------- */
+#HudMeterCard {
+    background: #1D2027;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+#HudMeterCardName { color: #ECEDEF; font-weight: 600; }
+
+/* Action buttons on Ball / Decal cards. Green = commit (Apply); red =
+   destructive (Remove + the global Restore buttons + the per-card
+   Restore state). See apple_dark.qss for the `[active="true"]` rationale. */
+#BallCardApply, #DecalCardApply, #HudMeterCardApply,
+#WorkshopCardApply, #WorkshopCardDownload {
+    background: #2EA44F; color: white; border: 1px solid #2EA44F; border-radius: 8px;
+    padding: 8px 14px; font-weight: 600;
+}
+#BallCardApply:hover, #DecalCardApply:hover, #HudMeterCardApply:hover,
+#WorkshopCardApply:hover, #WorkshopCardDownload:hover { background: #2C974B; border: 1px solid #2C974B; }
+#BallCardApply:disabled, #DecalCardApply:disabled, #HudMeterCardApply:disabled,
+#WorkshopCardApply:disabled, #WorkshopCardDownload:disabled {
+    background: rgba(46,164,79,0.45); border: 1px solid rgba(46,164,79,0.45); color: #FFFFFF;
+}
+#DecalCardApply[active="true"], #HudMeterCardApply[active="true"] { background: #DC2626; border: 1px solid #DC2626; }
+#DecalCardApply[active="true"]:hover, #HudMeterCardApply[active="true"]:hover { background: #B91C1C; border: 1px solid #B91C1C; }
+#BallCardRemove, #DecalCardRemove, #HudMeterCardRemove,
+#WorkshopCardDelete,
+#BallRestoreDefault, #DecalRestoreAll, #WorkshopRestoreOriginal {
+    background: #DC2626; color: white; border: 1px solid #DC2626; border-radius: 8px;
+    padding: 8px 14px; font-weight: 600;
+}
+#BallCardRemove:hover, #DecalCardRemove:hover, #HudMeterCardRemove:hover,
+#WorkshopCardDelete:hover,
+#BallRestoreDefault:hover, #DecalRestoreAll:hover, #WorkshopRestoreOriginal:hover { background: #B91C1C; border: 1px solid #B91C1C; color: #FFFFFF; }
+/* Disabled = nothing to revert/restore. See apple_dark.qss. */
+#BallRestoreDefault:disabled, #DecalRestoreAll:disabled, #WorkshopRestoreOriginal:disabled {
+    background: rgba(220,38,38,0.35); border: 1px solid rgba(220,38,38,0.35); color: #FFFFFF;
+}
+
+/* Preset card actions — see apple_dark.qss for the rationale. */
+#PresetLoad, #PresetLoad:disabled {
+    background: #2EA44F; color: white; border: 1px solid #2EA44F; border-radius: 8px;
+    padding: 8px 14px; font-weight: 600;
+}
+#PresetLoad:hover { background: #2C974B; border: 1px solid #2C974B; }
+#PresetRename {
+    background: #2563EB; color: white; border: 1px solid #2563EB; border-radius: 8px;
+    padding: 8px 14px; font-weight: 600;
+}
+#PresetRename:hover { background: #1D4ED8; border: 1px solid #1D4ED8; color: #FFFFFF; }
+
+/* Card-grid scroll area: inherit the parent view's background. */
+#BallView QScrollArea,
+#DecalView QScrollArea,
+#HudMeterView QScrollArea,
+#WorkshopView QScrollArea,
+#BallView QAbstractScrollArea,
+#DecalView QAbstractScrollArea,
+#HudMeterView QAbstractScrollArea,
+#WorkshopView QAbstractScrollArea {
+    background: transparent;
+    border: none;
+}
+#BallView QScrollArea > QWidget > QWidget,
+#DecalView QScrollArea > QWidget > QWidget,
+#HudMeterView QScrollArea > QWidget > QWidget,
+#WorkshopView QScrollArea > QWidget > QWidget {
+    background: transparent;
+}
+
+/* ---------- Search field ---------- */
+
+QLineEdit#Search {
+    background: #1D2027;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 6px 12px 6px 32px;
+    color: #ECEDEF;
+    selection-background-color: #7C7CFB;
+    selection-color: #FFFFFF;
+    min-height: 22px;
+}
+QLineEdit#Search:focus {
+    background: #1D2027;
+    border: 1px solid #7C7CFB;
+}
+
+QLineEdit#WorkshopSearch {
+    background: #1D2027;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 6px 12px;
+    color: #ECEDEF;
+    selection-background-color: #7C7CFB;
+    selection-color: #FFFFFF;
+}
+QLineEdit#WorkshopSearch:focus {
+    border: 1px solid #7C7CFB;
+}
+
+/* ---------- Item list rows ---------- */
+
+#ListPanel QListView,
+#SwapPickerView QListView { background: transparent; border: none; outline: 0; }
+#ListPanel QListView::item,
+#SwapPickerView QListView::item {
+    padding: 9px 12px;
+    border-radius: 8px;
+    margin: 2px 12px;
+    color: #ECEDEF;
+    min-height: 26px;
+}
+#ListPanel QListView::item:hover,
+#SwapPickerView QListView::item:hover    { background: #1D2027; color: #FFFFFF; }
+#ListPanel QListView::item:selected,
+#SwapPickerView QListView::item:selected { background: #262A33; color: #FFFFFF; }
+
+/* ---------- Detail pane labels ---------- */
+
+#DetailTitle  { font-size: 22px; font-weight: 700; color: #FFFFFF; letter-spacing: -0.3px; }
+#DetailStatus { font-size: 13px; color: #9BA1AD; }
+#DetailMeta   { font-size: 11px; font-weight: 700; color: #6A7180; letter-spacing: 1px; }
+
+#Preview {
+    background: #1D2027;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+}
+
+/* ---------- Active swaps cards ---------- */
+
+#ActiveSwapsHeading {
+    font-size: 22px;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: -0.3px;
+}
+
+#ActiveSwapsEmpty {
+    color: #6A7180;
+    font-size: 13px;
+    padding: 32px 0;
+}
+
+QWidget#DonationCard {
+    background: #1D2027;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+}
+#DonationBody { color: #ECEDEF; font-size: 14px; }
+#DonationNote { color: #FBBF24; font-size: 12px; font-style: italic; }
+#DonationUrlBox {
+    background: #0E1014;
+    color: #9696FF;
+    font-family: "Consolas", "Menlo", monospace;
+    font-size: 13px;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+
+/* ---------- Upgrade / upsell (Lite vs Plus) ---------- */
+#UpsellSubtitle { color: #9BA1AD; font-size: 13px; }
+QWidget#UpsellCardPlus {
+    background: #1D2027;
+    border: 2px solid #7C7CFB;
+    border-radius: 12px;
+}
+#UpsellTierName     { color: #FFFFFF; font-size: 18px; font-weight: 700; }
+#UpsellTierNamePlus { color: #9696FF; font-size: 18px; font-weight: 700; }
+#UpsellTagline      { color: #9BA1AD; font-size: 12px; }
+#UpsellBadge {
+    background: #7C7CFB; color: #FFFFFF;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+    border-radius: 8px; padding: 2px 8px;
+}
+#UpsellFeature      { color: #ECEDEF; font-size: 13px; }
+#UpsellFeatureMuted { color: #5A606B; font-size: 13px; }
+#UpsellCheck        { color: #7C7CFB; font-size: 14px; font-weight: 700; }
+#UpsellCheckPlus    { color: #FBBF24; font-size: 14px; font-weight: 700; }
+#UpsellCross        { color: #5A606B; font-size: 14px; font-weight: 700; }
+#UpsellDivider      { color: #6A7180; font-size: 10px; font-weight: 700; letter-spacing: 0.6px; }
+#UpsellFootnote     { color: #6A7180; font-size: 12px; }
+
+QWidget#SwapCard {
+    background: #1D2027;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+}
+QWidget#SwapCard:hover {
+    background: #262A33;
+    border: 1px solid rgba(255,255,255,0.10);
+}
+
+#SwapCardLabel       { color: #ECEDEF; font-size: 14px; font-weight: 500; }
+#SwapCardArrow       { color: #6A7180; font-size: 13px; padding: 0 6px; }
+#SwapCardSourceLabel { color: #9BA1AD; font-size: 14px; font-weight: 500; }
+#SwapCardCaption     { color: #6A7180; font-size: 11px; letter-spacing: 0.6px; font-weight: 600; }
+
+/* ---------- Buttons ---------- */
+
+QPushButton {
+    background: #1D2027;
+    color: #ECEDEF;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 8px 14px;
+    min-height: 22px;
+    font-weight: 500;
+}
+QPushButton:hover  {
+    background: #262A33;
+    border: 1px solid rgba(255,255,255,0.14);
+    color: #FFFFFF;
+}
+QPushButton:pressed {
+    background: #2F343E;
+}
+QPushButton:disabled {
+    color: #4A4F58;
+    background: #16181D;
+    border: 1px solid rgba(255,255,255,0.04);
+}
+
+QPushButton[primary="true"] {
+    background: #7C7CFB;
+    color: #FFFFFF;
+    border: 1px solid #7C7CFB;
+    font-weight: 600;
+}
+QPushButton[primary="true"]:hover  { background: #9696FF; border: 1px solid #9696FF; }
+QPushButton[primary="true"]:pressed { background: #5B5BD6; border: 1px solid #5B5BD6; }
+
+/* Destructive actions (Delete preset, Revert swap, Quit update dialog).
+   Solid red matches the Restore-default / Remove buttons on the Ball /
+   Decal cards so all destructive UI looks the same. */
+QPushButton[danger="true"] {
+    background: #DC2626;
+    color: #FFFFFF;
+    border: 1px solid #DC2626;
+}
+QPushButton[danger="true"]:hover {
+    background: #B91C1C;
+    border: 1px solid #B91C1C;
+    color: #FFFFFF;
+}
+QPushButton[danger="true"]:disabled {
+    background: rgba(220,38,38,0.35);
+    color: #FFFFFF;
+    border: 1px solid rgba(220,38,38,0.35);
+}
+
+/* ---------- Scrollbar ---------- */
+
+QScrollBar:vertical { background: transparent; width: 10px; margin: 4px 0; }
+QScrollBar::handle:vertical {
+    background: rgba(255,255,255,0.08);
+    border-radius: 5px;
+    min-height: 30px;
+}
+QScrollBar::handle:vertical:hover { background: rgba(255,255,255,0.16); }
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; background: transparent; }
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background: transparent; }
+QScrollBar:horizontal { height: 0; background: transparent; }
+
+/* ---------- Tooltips, dialogs, message boxes ---------- */
+
+QToolTip {
+    background: #16181D;
+    color: #ECEDEF;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    padding: 4px 8px;
+}
+
+#SwapWarning {
+    color: #FBBF24;
+    background: rgba(251,191,36,0.08);
+    border: 1px solid rgba(251,191,36,0.30);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    font-style: italic;
+}
+
+QDialog, QMessageBox {
+    background: #16181D;
+    color: #ECEDEF;
+}
+
+QDialog QLabel { color: #ECEDEF; background: transparent; }
+QDialog QLabel#AboutLabel { color: #6A7180; font-size: 12px; }
+
+/* QFormLayout left-column labels */
+QDialog QFormLayout QLabel { color: #9BA1AD; }
+
+QComboBox {
+    background: #1D2027;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 6px 12px;
+    color: #ECEDEF;
+    min-height: 22px;
+}
+QComboBox:hover { border: 1px solid rgba(255,255,255,0.16); }
+QComboBox:focus { border: 1px solid #7C7CFB; }
+/* Hide the dropdown indicator entirely. The "click to expand" affordance
+   is the combo body itself; the little arrow on the right edge added
+   visual noise without helping discoverability. */
+QComboBox::drop-down {
+    border: none;
+    background: transparent;
+    width: 0;
+}
+QComboBox::down-arrow {
+    image: none;
+    width: 0;
+    height: 0;
+    border: none;
+}
+/* Active-swaps source filter: drop the indicator entirely — the user
+   reported it rendering as a stray dot/dash, and the filter is small
+   enough that the trailing padding suffices as a click target. */
+QComboBox#ActiveSwapsFilter::drop-down,
+QComboBox#ActiveSwapsCategoryFilter::drop-down { width: 0; border: none; }
+QComboBox#ActiveSwapsFilter::down-arrow,
+QComboBox#ActiveSwapsCategoryFilter::down-arrow { image: none; width: 0; height: 0; border: none; }
+QComboBox#ActiveSwapsFilter,
+QComboBox#ActiveSwapsCategoryFilter { padding-right: 12px; }
+QComboBox QAbstractItemView,
+QListView#WorkshopSortView {
+    background: #1D2027;
+    color: #ECEDEF;
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 8px;
+    padding: 4px;
+    selection-background-color: rgba(124,124,251,0.20);
+    selection-color: #FFFFFF;
+    outline: 0;
+}
+QComboBox QAbstractItemView::item,
+QListView#WorkshopSortView::item {
+    border-radius: 6px;
+    padding: 6px 10px;
+    min-height: 22px;
+}
+
+/* QKeySequenceEdit — used by the Cycle-playlist and Overlay-toggle hotkey
+   fields. Mirror the QComboBox visual so both controls in a form line up.
+   The widget is a composite QWidget + inner QLineEdit, so we style both
+   the container (in case its frame leaks through) and the QLineEdit. */
+QKeySequenceEdit {
+    background: transparent;
+    border: none;
+}
+QKeySequenceEdit QLineEdit {
+    background: #1D2027;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 6px 12px;
+    color: #ECEDEF;
+    min-height: 22px;
+    selection-background-color: rgba(124,124,251,0.30);
+    selection-color: #FFFFFF;
+}
+QKeySequenceEdit QLineEdit:hover  { border: 1px solid rgba(255,255,255,0.16); }
+QKeySequenceEdit QLineEdit:focus  { border: 1px solid #7C7CFB; }
+
+/* ControllerCaptureLineEdit — matches the keyboard hotkey field above so
+   both rows in the Keybinds tab line up visually. */
+QLineEdit#ControllerCaptureLineEdit {
+    background: #1D2027;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 6px 12px;
+    color: #ECEDEF;
+    min-height: 22px;
+    selection-background-color: rgba(124,124,251,0.30);
+    selection-color: #FFFFFF;
+}
+QLineEdit#ControllerCaptureLineEdit:hover { border: 1px solid rgba(255,255,255,0.16); }
+QLineEdit#ControllerCaptureLineEdit:focus { border: 1px solid #7C7CFB; }
+
+/* KeyCaptureLineEdit — bring-to-front hotkey in the Settings dialog. */
+QLineEdit#KeyCaptureLineEdit {
+    background: #1D2027;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 6px 12px;
+    color: #ECEDEF;
+    min-height: 22px;
+    selection-background-color: rgba(124,124,251,0.30);
+    selection-color: #FFFFFF;
+}
+QLineEdit#KeyCaptureLineEdit:hover { border: 1px solid rgba(255,255,255,0.16); }
+QLineEdit#KeyCaptureLineEdit:focus { border: 1px solid #7C7CFB; }
+
+/* QSpinBox — same surface so any future port preserves the look. */
+QSpinBox {
+    background: #1D2027;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 6px 12px;
+    color: #ECEDEF;
+    min-height: 22px;
+}
+QSpinBox:hover  { border: 1px solid rgba(255,255,255,0.16); }
+QSpinBox:focus  { border: 1px solid #7C7CFB; }
+
+QFrame[frameShape="4"] {  /* HLine */
+    color: rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.08);
+    max-height: 1px;
+    border: none;
+}
+
+/* Tracker tab + Tutorial tab — shared shell (see apple_dark.qss). */
+#TrackerView,
+#TutorialView { background: #16181D; }
+
+QTabWidget#TrackerTabs::pane,
+QTabWidget#TutorialTabs::pane {
+    background: #16181D;
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.08);
+}
+QTabWidget#TrackerTabs > QWidget,
+QTabWidget#TrackerTabs QScrollArea,
+QTabWidget#TrackerTabs QScrollArea > QWidget,
+QTabWidget#TrackerTabs QScrollArea > QWidget > QWidget,
+QTabWidget#TutorialTabs > QWidget,
+QTabWidget#TutorialTabs QScrollArea,
+QTabWidget#TutorialTabs QScrollArea > QWidget,
+QTabWidget#TutorialTabs QScrollArea > QWidget > QWidget {
+    background: #16181D;
+}
+QTabWidget#TrackerTabs QTabBar,
+QTabWidget#TutorialTabs QTabBar { background: transparent; }
+QTabWidget#TrackerTabs QTabBar::tab,
+QTabWidget#TutorialTabs QTabBar::tab {
+    background: transparent;
+    color: #9BA1AD;
+    padding: 8px 18px;
+    border: none;
+    margin-right: 4px;
+    font-weight: 500;
+}
+QTabWidget#TrackerTabs QTabBar::tab:hover,
+QTabWidget#TutorialTabs QTabBar::tab:hover    { color: #ECEDEF; }
+QTabWidget#TrackerTabs QTabBar::tab:selected,
+QTabWidget#TutorialTabs QTabBar::tab:selected {
+    color: #ECEDEF;
+    border-bottom: 2px solid #7C7CFB;
+}
+
+#TrackerCard {
+    background: #1D2027;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+}
+#TrackerStatusPill {
+    background: #262A33;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+#TrackerStatusPill[state="connected"]    { color: #34D399; }
+#TrackerStatusPill[state="disconnected"] { color: #9BA1AD; }
+#TrackerStatusPill[state="connecting"]   { color: #FBBF24; }
+#TrackerHandle      { color: #ECEDEF; font-weight: 500; }
+#TrackerMmrLine     { color: #ECEDEF; font-family: "Consolas", "Menlo", monospace; }
+#TrackerTeamLabel   { color: #ECEDEF; font-weight: 600; padding-top: 6px; }
+
+/* Hero MMR card — big rank icon + bold MMR number. The diagonal gradient
+   gives it just enough depth to read as a featured tile against the
+   adjacent TrackerCards without screaming for attention. The left-edge
+   accent flips colour with the player's tier (see [tier=...] rules). */
+#TrackerMmrHero {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #1F2230, stop:1 #15171F);
+    border: 1px solid rgba(124,124,251,0.18);
+    border-left: 4px solid rgba(255,255,255,0.18);
+    border-radius: 14px;
+}
+#TrackerMmrHero[tier="bronze"]         { border-left: 4px solid #A0612D; }
+#TrackerMmrHero[tier="silver"]         { border-left: 4px solid #B9C2C6; }
+#TrackerMmrHero[tier="gold"]           { border-left: 4px solid #F5C242; }
+#TrackerMmrHero[tier="platinum"]       { border-left: 4px solid #6DDDD3; }
+#TrackerMmrHero[tier="diamond"]        { border-left: 4px solid #6B9DFF; }
+#TrackerMmrHero[tier="champion"]       { border-left: 4px solid #B58CFF; }
+#TrackerMmrHero[tier="grand-champion"] { border-left: 4px solid #FF6E78; }
+#TrackerMmrHero[tier="ssl"]            { border-left: 4px solid #FF3DD0; }
+#TrackerRankIcon       { background: transparent; }
+#TrackerMmrShowing {
+    color: #7C7FA8;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.6px;
+}
+#TrackerRankName {
+    color: #FFFFFF;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+}
+#TrackerMmrNumber {
+    color: #FFFFFF;
+    font-size: 32px;
+    font-weight: 800;
+    font-family: "Segoe UI Variable", "Inter", "SF Pro Display", sans-serif;
+}
+#TrackerMmrPeak {
+    color: #7C7FA8;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    padding-bottom: 6px;
+}
+#TrackerPlaylistTag {
+    background: rgba(124,124,251,0.18);
+    color: #DEDEFF;
+    border: 1px solid rgba(124,124,251,0.40);
+    border-radius: 14px;
+    padding: 5px 14px;
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 1.6px;
+    min-width: 44px;
+}
+#TrackerScore {
+    color: #FFFFFF;
+    font-size: 20px;
+    font-weight: 700;
+    padding: 0;
+    letter-spacing: 2px;
+}
+#TrackerTeamBlue {
+    color: #60A5FA;
+    font-weight: 700;
+    padding-top: 8px;
+}
+#TrackerTeamOrange {
+    color: #FB923C;
+    font-weight: 700;
+    padding-top: 8px;
+}
+#TrackerPlayerRow   { color: #9BA1AD; font-family: "Consolas", "Menlo", monospace; }
+#TrackerMatchEmpty  { color: #6A7180; padding: 12px 0; font-style: italic; }
+#TrackerOverlayHint { color: #E0B341; font-size: 12px; padding: 0 2px 8px 2px; }
+#TrackerResetSession {
+    background: #DC2626;
+    color: #FFFFFF;
+    border: 1px solid #DC2626;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-weight: 600;
+}
+#TrackerResetSession:hover { background: #B91C1C; border: 1px solid #B91C1C; }
+#TrackerPlaylistBtn {
+    background: transparent;
+    color: #9BA1AD;
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 6px;
+    padding: 4px 14px;
+    font-weight: 600;
+    min-width: 40px;
+}
+#TrackerPlaylistBtn:hover { background: rgba(255,255,255,0.06); color: #FFFFFF; }
+#TrackerPlaylistBtn:checked {
+    background: rgba(124,124,251,0.20);
+    color: #FFFFFF;
+    border: 1px solid rgba(124,124,251,0.40);
+}
+#TrackerBlueCard {
+    background: rgba(96,165,250,0.08);
+    border: 1px solid rgba(96,165,250,0.25);
+    border-radius: 8px;
+}
+#TrackerOrangeCard {
+    background: rgba(251,146,60,0.08);
+    border: 1px solid rgba(251,146,60,0.25);
+    border-radius: 8px;
+}
+#TrackerColHeader {
+    color: #9BA1AD;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    padding-bottom: 4px;
+}
